@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Builder Pro | Monte seu Setup Perfeito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
+
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-500 text-white p-2 rounded-xl shadow-md">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-brand-600 to-emerald-500 bg-clip-text text-transparent">PC Builder Pro</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleDarkMode()" aria-label="Alternar Tema" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    <svg id="theme-icon" class="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+                <button onclick="resetBuild()" class="text-sm font-medium px-4 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 transition">Limpar Build</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Component slots list -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold tracking-tight">Componentes do Sistema</h2>
+                    <span id="items-selected-count" class="text-sm px-3 py-1 bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 rounded-full font-medium">0/7 selecionados</span>
+                </div>
+                
+                <div id="components-container" class="space-y-4">
+                    <!-- Dynamic slots injected here -->
+                </div>
+            </div>
+
+            <!-- Dashboard summary sidebar -->
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-100 dark:border-slate-700/60 sticky top-24">
+                    <h3 class="text-lg font-bold mb-4">Resumo da Máquina</h3>
+                    
+                    <!-- Metrics grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1">Consumo Total</span>
+                            <div class="flex items-baseline space-x-1">
+                                <span id="total-wattage" class="text-2xl font-bold">0</span>
+                                <span class="text-xs text-slate-500">W</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1">Fonte Recomendada</span>
+                            <span id="suggested-psu" class="text-lg font-bold">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Compatibility Box -->
+                    <div id="compatibility-box" class="mb-6 p-4 rounded-xl bg-brand-50 dark:bg-brand-950/50 border border-brand-200 dark:border-brand-900/50 text-brand-700 dark:text-brand-300 text-sm">
+                        <div class="flex items-center space-x-2 font-semibold mb-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Compatibilidade OK</span>
+                        </div>
+                        <p id="compatibility-msg" class="text-xs opacity-90">Selecione componentes para validar soquetes e memórias automaticamente.</p>
+                    </div>
+
+                    <!-- Investment summary & Checkout Action -->
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-slate-500 dark:text-slate-400">Total Estimado:</span>
+                            <span id="total-price" class="text-2xl font-extrabold text-brand-600 dark:text-brand-400">R$ 0,00</span>
+                        </div>
+                        <button onclick="openCheckoutModal()" class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/20 transition transform active:scale-95 flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            <span>Gerar Resumo em Markdown</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="selector-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                <h3 id="modal-title" class="text-xl font-bold">Selecionar Componente</h3>
+                <button onclick="closeModal()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                <input type="text" id="modal-search" oninput="filterModalItems()" placeholder="Pesquisar por modelo..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+            </div>
+            <div id="modal-items-list" class="p-4 overflow-y-auto space-y-3 flex-1">
+                <!-- Dynamic items rendered via script -->
+            </div>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                <h3 class="text-xl font-bold">Resumo da Build (Markdown)</h3>
+                <button onclick="closeCheckoutModal()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <p class="text-sm text-slate-500 dark:text-slate-400">Copie o conteúdo em formato Markdown para colar no GitHub README ou compartilhar:</p>
+                <textarea id="checkout-text" readonly class="w-full h-64 p-4 rounded-xl font-mono text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none"></textarea>
+                <div id="copy-feedback" class="text-xs text-brand-600 font-medium hidden">Resumo copiado com sucesso para a área de transferência!</div>
+            </div>
+            <div class="p-6 border-t border-slate-100 dark:border-slate-700 flex justify-end space-x-3">
+                <button onclick="closeCheckoutModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium text-sm transition">Fechar</button>
+                <button onclick="copyCheckoutText()" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow-lg shadow-brand-600/20 transition flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    <span>Copiar Markdown</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const catalog = {
+            cpu: [
+                { id: 'cpu1', name: 'Intel Core i5-13400F', socket: 'LGA1700', ramType: 'DDR4/DDR5', wattage: 65, price: 1199.00 },
+                { id: 'cpu2', name: 'Intel Core i7-13700K', socket: 'LGA1700', ramType: 'DDR4/DDR5', wattage: 125, price: 2399.00 },
+                { id: 'cpu3', name: 'AMD Ryzen 5 5600X', socket: 'AM4', ramType: 'DDR4', wattage: 65, price: 899.00 },
+                { id: 'cpu4', name: 'AMD Ryzen 7 7700X', socket: 'AM5', ramType: 'DDR5', wattage: 105, price: 1899.00 }
+            ],
+            motherboard: [
+                { id: 'mb1', name: 'ASUS Prime B660M-A D4', socket: 'LGA1700', ramType: 'DDR4', formFactor: 'mATX', price: 849.00 },
+                { id: 'mb2', name: 'Gigabyte Z790 Aorus Elite', socket: 'LGA1700', ramType: 'DDR5', formFactor: 'ATX', price: 1699.00 },
+                { id: 'mb3', name: 'MSI B550M PRO-VDH WiFi', socket: 'AM4', ramType: 'DDR4', formFactor: 'mATX', price: 799.00 },
+                { id: 'mb4', name: 'Gigabyte B650 Aorus Elite AX', socket: 'AM5', ramType: 'DDR5', formFactor: 'ATX', price: 1499.00 }
+            ],
+            ram: [
+                { id: 'ram1', name: 'Corsair Vengeance LPX 16GB (2x8) 3200MHz', ramType: 'DDR4', wattage: 10, price: 319.00 },
+                { id: 'ram2', name: 'Kingston Fury Beast 32GB (2x16) 3200MHz', ramType: 'DDR4', wattage: 15, price: 599.00 },
+                { id: 'ram3', name: 'Corsair Vengeance RGB 32GB (2x16) 5600MHz', ramType: 'DDR5', wattage: 15, price: 899.00 }
+            ],
+            gpu: [
+                { id: 'gpu1', name: 'NVIDIA GeForce RTX 4060 8GB', wattage: 115, price: 1999.00, length: 240 },
+                { id: 'gpu2', name: 'NVIDIA GeForce RTX 4070 12GB', wattage: 200, price: 3799.00, length: 265 },
+                { id: 'gpu3', name: 'AMD Radeon RX 7600 8GB', wattage: 165, price: 1699.00, length: 220 },
+                { id: 'gpu4', name: 'AMD Radeon RX 7800 XT 16GB', wattage: 263, price: 3899.00, length: 280 }
+            ],
+            storage: [
+                { id: 'st1', name: 'SSD Kingston NV2 1TB NVMe', wattage: 5, price: 429.00 },
+                { id: 'st2', name: 'SSD Samsung 980 Pro 2TB NVMe', wattage: 8, price: 1099.00 }
+            ],
+            psu: [
+                { id: 'psu1', name: 'MSI MAG A550BN 550W 80 Plus Bronze', wattage: 550, price: 329.00 },
+                { id: 'psu2', name: 'Corsair RM650 650W 80 Plus Gold Full Modular', wattage: 650, price: 799.00 },
+                { id: 'psu3', name: 'Corsair RM850x 850W 80 Plus Gold Full Modular', wattage: 850, price: 1099.00 }
+            ],
+            case: [
+                { id: 'cs1', name: 'Deepcool CC560 Mid Tower', formFactor: 'ATX', maxGpuLength: 370, price: 349.00 },
+                { id: 'cs2', name: 'NZXT H5 Flow Compact ATX', formFactor: 'ATX', maxGpuLength: 365, price: 799.00 }
+            ]
+        };
+
+        const componentSlots = [
+            { key: 'cpu', label: 'Processador (CPU)', icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z' },
+            { key: 'motherboard', label: 'Placa-Mãe', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
+            { key: 'ram', label: 'Memória RAM', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
+            { key: 'gpu', label: 'Placa de Vídeo (GPU)', icon: 'M9 17h6m-3-3v3m-9 h18a2 2 0 002-2V7a2 2 0 00-2-2H3a2 2 0 00-2 2v8a2 2 0 002 2z' },
+            { key: 'storage', label: 'Armazenamento (SSD)', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4' },
+            { key: 'psu', label: 'Fonte de Alimentação', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+            { key: 'case', label: 'Gabinete', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' }
+        ];
+
+        let currentBuild = { cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null };
+        let activeCategory = null;
+
+        function initApp() {
+            renderSlots();
+            updateDashboard();
+        }
+
+        function renderSlots() {
+            const container = document.getElementById('components-container');
+            container.innerHTML = '';
+            
+            componentSlots.forEach(slot => {
+                const item = currentBuild[slot.key];
+                const isSelected = item !== null;
+
+                const card = document.createElement('div');
+                card.className = `bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border transition-all shadow-sm flex items-center justify-between ${isSelected ? 'border-brand-500/50 dark:border-brand-500/50' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl ${isSelected ? 'bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400' : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500'} flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${slot.icon}"></path></svg>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">${slot.label}</span>
+                            <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm sm:text-base">${isSelected ? item.name : 'Nenhum selecionado'}</h4>
+                            ${isSelected ? `<span class="text-xs text-brand-600 dark:text-brand-400 font-medium">R$ ${item.price.toFixed(2).replace('.', ',')}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        ${isSelected ? `<button onclick="removeComponent('${slot.key}')" class="p-2 text-slate-400 hover:text-red-500 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition" title="Remover"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : ''}
+                        <button onclick="openModal('${slot.key}')" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white dark:hover:bg-brand-600 text-sm font-semibold rounded-xl transition">
+                            ${isSelected ? 'Trocar' : 'Escolher'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openModal(category) {
+            activeCategory = category;
+            const slotConfig = componentSlots.find(s => s.key === category);
+            document.getElementById('modal-title').innerText = `Selecionar ${slotConfig.label}`;
+            document.getElementById('modal-search').value = '';
+            renderModalItems('');
+            document.getElementById('selector-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('selector-modal').classList.add('hidden');
+            activeCategory = null;
+        }
+
+        function renderModalItems(searchQuery) {
+            const list = document.getElementById('modal-items-list');
+            list.innerHTML = '';
+
+            let items = catalog[activeCategory] || [];
+            if (searchQuery) {
+                items = items.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            }
+
+            if (items.length === 0) {
+                list.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">Nenhum componente encontrado.</div>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-500 bg-white dark:bg-slate-800 flex items-center justify-between cursor-pointer transition";
+                card.onclick = () => selectComponent(item);
+
+                let badgeText = `R$ ${item.price.toFixed(2).replace('.', ',')}`;
+                if (item.wattage) badgeText += ` • ${item.wattage}W`;
+                if (item.socket) badgeText += ` • ${item.socket}`;
+
+                card.innerHTML = `
+                    <div>
+                        <h5 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.name}</h5>
+                        <span class="text-xs text-slate-500 font-medium">${badgeText}</span>
+                    </div>
+                    <button class="px-3 py-1.5 bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-xs font-semibold rounded-lg">Selecionar</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function filterModalItems() {
+            const query = document.getElementById('modal-search').value;
+            renderModalItems(query);
+        }
+
+        function selectComponent(item) {
+            currentBuild[activeCategory] = item;
+            closeModal();
+            renderSlots();
+            updateDashboard();
+        }
+
+        function removeComponent(category) {
+            currentBuild[category] = null;
+            renderSlots();
+            updateDashboard();
+        }
+
+        function resetBuild() {
+            currentBuild = { cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null };
+            renderSlots();
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const selectedCount = Object.values(currentBuild).filter(i => i !== null).length;
+            document.getElementById('items-selected-count').innerText = `${selectedCount}/7 selecionados`;
+
+            let totalPrice = 0;
+            let totalWattage = 0;
+
+            Object.values(currentBuild).forEach(item => {
+                if (item) {
+                    totalPrice += item.price;
+                    if (item.wattage) totalWattage += item.wattage;
+                }
+            });
+
+            document.getElementById('total-price').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+            document.getElementById('total-wattage').innerText = totalWattage;
+
+            let suggestedPsuWattage = Math.ceil((totalWattage * 1.3) / 50) * 50;
+            if (suggestedPsuWattage < 400 && totalWattage > 0) suggestedPsuWattage = 500;
+            document.getElementById('suggested-psu').innerText = totalWattage > 0 ? `${suggestedPsuWattage}W` : '-';
+
+            validateCompatibility();
+        }
+
+        function validateCompatibility() {
+            const box = document.getElementById('compatibility-box');
+            let issues = [];
+
+            const cpu = currentBuild.cpu;
+            const mb = currentBuild.motherboard;
+            const ram = currentBuild.ram;
+            const psu = currentBuild.psu;
+
+            if (cpu && mb && cpu.socket !== mb.socket) {
+                issues.push(`Soquete incompatível: CPU (${cpu.socket}) vs Placa-Mãe (${mb.socket}).`);
+            }
+
+            if (ram && mb && !mb.ramType.includes(ram.ramType)) {
+                issues.push(`Tipo de RAM incompatível: Placa-Mãe suporta (${mb.ramType}), mas a RAM é (${ram.ramType}).`);
+            }
+
+            let totalWattage = Object.values(currentBuild).reduce((acc, curr) => acc + (curr?.wattage || 0), 0);
+            if (psu && totalWattage > psu.wattage) {
+                issues.push(`Fonte insuficiente: Consumo estimado (${totalWattage}W) excede a capacidade da fonte (${psu.wattage}W).`);
+            }
+
+            if (issues.length > 0) {
+                box.className = "mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 text-sm";
+                box.innerHTML = `
+                    <div class="flex items-center space-x-2 font-semibold mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <span>Atenção: Incompatibilidade Encontrada</span>
+                    </div>
+                    <ul class="list-disc list-inside text-xs opacity-90 space-y-1">
+                        ${issues.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                box.className = "mb-6 p-4 rounded-xl bg-brand-50 dark:bg-brand-950/50 border border-brand-200 dark:border-brand-900/50 text-brand-700 dark:text-brand-300 text-sm";
+                box.innerHTML = `
+                    <div class="flex items-center space-x-2 font-semibold mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Compatibilidade OK</span>
+                    </div>
+                    <p class="text-xs opacity-90">Nenhum conflito crítico de hardware detectado.</p>
+                `;
+            }
+        }
+
+        function openCheckoutModal() {
+            let md = "# 💻 Meu Setup Virtual (PC Builder)\n\n";
+            md += "| Componente | Modelo | Preço |\n| :--- | :--- | :--- |\n";
+            
+            let totalPrice = 0;
+            let totalWattage = 0;
+
+            componentSlots.forEach(slot => {
+                const item = currentBuild[slot.key];
+                if (item) {
+                    md += `| **${slot.label}** | ${item.name} | R$ ${item.price.toFixed(2).replace('.', ',')} |\n`;
+                    totalPrice += item.price;
+                    if (item.wattage) totalWattage += item.wattage;
+                } else {
+                    md += `| **${slot.label}** | *Não selecionado* | - |\n`;
+                }
+            });
+
+            md += `\n### 📊 Resumo Técnico\n`;
+            md += `- **Consumo Estimado:** ${totalWattage}W\n`;
+            md += `- **Investimento Total:** R$ ${totalPrice.toFixed(2).replace('.', ',')}\n`;
+
+            document.getElementById('checkout-text').value = md;
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+            document.getElementById('copy-feedback').classList.add('hidden');
+        }
+
+        function copyCheckoutText() {
+            const textarea = document.getElementById('checkout-text');
+            textarea.select();
+            document.execCommand('copy');
+            
+            const feedback = document.getElementById('copy-feedback');
+            feedback.classList.remove('hidden');
+            setTimeout(() => feedback.classList.add('hidden'), 3000);
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
